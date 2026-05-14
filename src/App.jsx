@@ -1,39 +1,66 @@
-import { v4 as uuid } from "uuid";
+import React, { useState } from 'react'
+import { v4 as uuid } from "uuid"
+import GlobalStyles from './globalStyles.js';
 
+import { Container, ToDoList, Input, Button, ListItem, FieldTasks, TaskSpace, CheckMark, Trash, EmptyList } from './styles.js'
 
 function App() {
-  const list = [{ id: uuid(), task: "Estudar para dar um futuro incrível para o meu amor!"},
-    {id: uuid(), task: "Trabalhar ainda esse ano!"},
-    {id: uuid(), task: "Buscar mais a presença do Senhor!"},
-    {id: uuid(), task: "Me tornar cada vez melhor para o meu amor!"},
-  ]
+  const [list, setList] = useState([])
+  const [inputTask, setInputTask] = useState('')
 
   function inputMudou(event) {
-    console.log(event.target.value)
-    list.push({id: uuid(), task: event.target.value})
-
-    console.log(list)
+    setInputTask(event.target.value)
   }
 
   function CliqueiNoBotao() {
-    console.log("Eu te amo minha rainha amada!!!")
+    if(inputTask) {
+      setList([...list, { id: uuid(), task: inputTask, finished: false }])
+    }
   }
 
-  return (
-    <>
-      <div>
-          <input onChange={inputMudou} placeholder="O que tenho para fazer..." />
-          <button onClick={CliqueiNoBotao}>Adicionar</button>
+  function finalizarTarefa(id) {
 
-          <ul>
-            {
-              list.map( item => (
-                <li key={item.id}>{item.task}</li>
+    const newList = list.map(item => (
+      item.id == id ? { ...item, finished: !item.finished } : item
+    ))
+
+    setList(newList)
+  }
+
+  function deletarTarefa(id) {
+    const newList = list.filter(item => item.id !== id)
+
+    setList(newList)
+  }
+
+
+
+  return (
+    <Container>
+      <ToDoList>
+
+        <TaskSpace >
+          <Input onChange={inputMudou} placeholder="Novos pedidos:" />
+          <Button onClick={CliqueiNoBotao}>Adicionar</Button>
+        </TaskSpace>
+
+        <ul>
+          {list.length > 0 ? (
+              list.map(item => (
+                <ListItem $isFinished={item.finished} $isDeleted={item.deleted} key={item.id}>
+                  <CheckMark onClick={() => finalizarTarefa(item.id)} />
+                  <FieldTasks>{item.task}</FieldTasks>
+                  <Trash onClick={() => deletarTarefa(item.id)} />
+                </ListItem>
               ))
-            }
-          </ul>
-      </div>
-    </>
+            ) : (
+              <EmptyList>Não há itens na lista...</EmptyList>
+            )
+          }
+        </ul>
+      </ToDoList>
+    </Container>
+
   )
 }
 
